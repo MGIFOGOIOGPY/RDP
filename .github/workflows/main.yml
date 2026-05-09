@@ -1,0 +1,16 @@
+name: Windows RDP
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Enable RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd123!" -Force)
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - name: Start Cloudflare Tunnel
+      run: |
+        iex "& { $(irm https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe) } tunnel --url localhost:3389 --name rdp-tunnel"
